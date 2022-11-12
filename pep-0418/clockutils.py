@@ -72,8 +72,8 @@ def monotonic():
     global _global_monotonic
     if _global_monotonic is None:
         _global_monotonic = monotonic_clock()
-        if _global_monotonic is None:
-            raise RunTimeError("no monotonic clock available")
+    if _global_monotonic is None:
+        raise RunTimeError("no monotonic clock available")
     return _global_monotonic.now()
 
 _global_hires = None
@@ -84,8 +84,8 @@ def highres():
     global _global_hires
     if _global_hires is None:
         _global_hires = highres()
-        if _global_hires is None:
-            raise RunTimeError("no highres clock available")
+    if _global_hires is None:
+        raise RunTimeError("no highres clock available")
     return _global_hires.now()
 
 _global_steady = None
@@ -96,8 +96,8 @@ def steady():
     global _global_steady
     if _global_steady is None:
         _global_steady = steady()
-        if _global_steady is None:
-            raise RunTimeError("no steady clock available")
+    if _global_steady is None:
+        raise RunTimeError("no steady clock available")
     return _global_steady.now()
 
 class _Clock_Flags(int):
@@ -167,11 +167,17 @@ class _Clock(object):
 
     def __repr__(self):
         props = [self.__class__.__name__]
-        for attr in sorted( [ attr for attr in dir(self)
-                              if attr
-                                 and attr[0].isalpha()
-                                 and attr not in ('now',)] ):
-            props.append("%s=%s" % (attr, getattr(self, attr)))
+        props.extend(
+            f"{attr}={getattr(self, attr)}"
+            for attr in sorted(
+                [
+                    attr
+                    for attr in dir(self)
+                    if attr and attr[0].isalpha() and attr not in ('now',)
+                ]
+            )
+        )
+
         return "<" + " ".join(props) + ">"
 
 ClockEntry = namedtuple('ClockEntry', 'flags factory')

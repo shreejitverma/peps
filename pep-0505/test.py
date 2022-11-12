@@ -10,24 +10,16 @@ def nc_ifblock1(a=None):
         a = 'foo'
 
 def nc_ifblock2(a=None):
-    if a is not None:
-        pass
-    else:
+    if a is None:
         a = 'foo'
 
 class NcIfBlock3:
     def __init__(self, a=None):
-        if a is None:
-            self.b = {}
-        else:
-            self.b = a
+        self.b = {} if a is None else a
 
 class NcIfBlock4:
     def __init__(self, a=None):
-        if a is not None:
-            self.b = a
-        else:
-            self.b = {}
+        self.b = a if a is not None else {}
 
 def nc_or1(a=None):
     return a or 'foo'
@@ -60,24 +52,16 @@ class SnIfBlock1:
 
 class SnIfBlock2:
     def __init__(self, a=None):
-        if a is None:
-            pass
-        else:
+        if a is not None:
             a.foo()
 
 class SnIfBlock3:
     def __init__(self, a=None):
-        if a is None:
-            b = 'foo'
-        else:
-            b = a.foo
+        b = 'foo' if a is None else a.foo
 
 class SnIfBlock4:
     def __init__(self, a=None):
-        if a is None:
-            b = 'foo'
-        else:
-            b = a['foo']
+        b = 'foo' if a is None else a['foo']
 
 def sn_ternary1(a=None):
     return a.foo if a is not None else None

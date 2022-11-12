@@ -20,6 +20,7 @@ open(cloexec=True) + close(): 8.01 us per call
 
 => 3% slower
 """
+
 import os, time
 
 name = __file__
@@ -32,14 +33,10 @@ for cloexec in (False, True):
         print("cloexec", cloexec, "run", run)
         time.sleep(1)
         start = time.perf_counter()
-        for loops in range(LOOPS):
+        for _ in range(LOOPS):
             fd = os.open(name, os.O_RDONLY, cloexec=cloexec)
             os.close(fd)
         dt = time.perf_counter() - start
-        if best is not None:
-            best = min(best, dt)
-        else:
-            best = dt
-
+        best = min(best, dt) if best is not None else dt
     seconds = best / LOOPS
     print("open(cloexec=%s) + close(): %.2f us per call" % (cloexec, seconds * 1e6))

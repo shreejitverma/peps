@@ -15,15 +15,8 @@ class PEPRole(roles.ReferenceRole):
             prb = self.inliner.problematic(self.rawtext, self.rawtext, msg)
             return [prb], [msg]
         pep_base = self.inliner.document.settings.pep_url.format(pep_num)
-        if fragment:
-            ref_uri = f"{pep_base}#{fragment}"
-        else:
-            ref_uri = pep_base
-        if self.has_explicit_title:
-            title = self.title
-        else:
-            title = f"PEP {pep_num}"
-
+        ref_uri = f"{pep_base}#{fragment}" if fragment else pep_base
+        title = self.title if self.has_explicit_title else f"PEP {pep_num}"
         return [
             nodes.reference(
                 "", title,

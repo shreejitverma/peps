@@ -57,8 +57,7 @@ class PEP:
         # Parse the headers.
         pep_text = filename.read_text(encoding="utf-8")
         metadata = HeaderParser().parsestr(pep_text)
-        required_header_misses = PEP.required_headers - set(metadata.keys())
-        if required_header_misses:
+        if required_header_misses := PEP.required_headers - set(metadata.keys()):
             _raise_pep_error(self, f"PEP is missing required headers {required_header_misses}")
 
         try:
@@ -177,10 +176,10 @@ def _raise_pep_error(pep: PEP, msg: str, pep_num: bool = False) -> None:
 
 def _parse_authors(pep: PEP, author_header: str, authors_overrides: dict) -> list[Author]:
     """Parse Author header line"""
-    authors_and_emails = _parse_author(author_header)
-    if not authors_and_emails:
+    if authors_and_emails := _parse_author(author_header):
+        return [parse_author_email(author_tuple, authors_overrides) for author_tuple in authors_and_emails]
+    else:
         raise _raise_pep_error(pep, "no authors found", pep_num=True)
-    return [parse_author_email(author_tuple, authors_overrides) for author_tuple in authors_and_emails]
 
 
 author_angled = re.compile(r"(?P<author>.+?) <(?P<email>.+?)>(,\s*)?")
@@ -202,10 +201,7 @@ def _parse_author(data: str) -> list[tuple[str, str]]:
             if not author.partition(" ")[1] and author.endswith("."):
                 prev_author = author_list.pop()
                 author = ", ".join([prev_author, author])
-            if "email" not in match_dict:
-                email = ""
-            else:
-                email = match_dict["email"]
+            email = "" if "email" not in match_dict else match_dict["email"]
             author_list.append((author, email))
 
         # If authors were found then stop searching as only expect one

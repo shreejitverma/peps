@@ -108,7 +108,7 @@ class PEPZeroWriter:
         for pep in peps:
             self.emit_pep_row(**pep.details)
         # list-table must have at least one body row
-        if len(peps) == 0:
+        if not peps:
             self.emit_text("   * -")
             self.emit_text("     -")
             self.emit_text("     -")
@@ -116,7 +116,7 @@ class PEPZeroWriter:
         self.emit_newline()
 
     def write_pep0(self, peps: list[PEP], header: str = HEADER, intro: str = INTRO, is_pep0: bool = True):
-        if len(peps) == 0:
+        if not peps:
             return ""
 
         # PEP metadata
@@ -213,8 +213,7 @@ class PEPZeroWriter:
             self.emit_newline()
             self.emit_newline()
 
-        pep0_string = "\n".join([str(s) for s in self.output])
-        return pep0_string
+        return "\n".join([str(s) for s in self.output])
 
 
 def _classify_peps(peps: list[PEP]) -> tuple[list[PEP], ...]:
@@ -286,9 +285,11 @@ def _verify_email_addresses(peps: list[PEP]) -> dict[str, str]:
         else:
             valid_authors_dict[last_first] = next(iter(emails), "")
     if too_many_emails:
-        err_output = []
-        for author, emails in too_many_emails:
-            err_output.append(" " * 4 + f"{author}: {emails}")
+        err_output = [
+            " " * 4 + f"{author}: {emails}"
+            for author, emails in too_many_emails
+        ]
+
         raise ValueError(
             "some authors have more than one email address listed:\n"
             + "\n".join(err_output)

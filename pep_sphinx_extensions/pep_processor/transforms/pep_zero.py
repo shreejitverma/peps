@@ -29,6 +29,8 @@ def _mask_email(ref: nodes.reference) -> nodes.reference:
     The returned node has no refuri link attribute.
 
     """
-    if not ref.get("refuri", "").startswith("mailto:"):
-        return ref
-    return nodes.raw("", ref[0].replace("@", "&#32;&#97;t&#32;"), format="html")
+    return (
+        nodes.raw("", ref[0].replace("@", "&#32;&#97;t&#32;"), format="html")
+        if ref.get("refuri", "").startswith("mailto:")
+        else ref
+    )

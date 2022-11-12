@@ -67,12 +67,7 @@ if __name__ == "__main__":
     doctree_directory = build_directory / ".doctrees"
 
     # builder configuration
-    if args.builder is not None:
-        sphinx_builder = args.builder
-    else:
-        # default builder
-        sphinx_builder = "html"
-
+    sphinx_builder = args.builder if args.builder is not None else "html"
     # other configuration
     config_overrides = {}
     if args.nitpicky:

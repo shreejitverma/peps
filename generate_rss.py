@@ -33,13 +33,12 @@ EXPLICIT_TITLE_RE = re.compile(r'^(.+?)\s*(?<!\x00)<(.*?)>$', re.DOTALL)
 
 def _pep_reference_role(role, rawtext, text, lineno, inliner,
                         options={}, content=[]):
-    matched = EXPLICIT_TITLE_RE.match(text)
-    if matched:
+    if matched := EXPLICIT_TITLE_RE.match(text):
         title = utils.unescape(matched.group(1))
         target = utils.unescape(matched.group(2))
     else:
         target = utils.unescape(text)
-        title = "PEP " + utils.unescape(text)
+        title = f"PEP {utils.unescape(text)}"
     pep_str, _, fragment = target.partition("#")
     try:
         pepnum = int(pep_str)
@@ -55,20 +54,19 @@ def _pep_reference_role(role, rawtext, text, lineno, inliner,
     ref = (inliner.document.settings.pep_base_url
            + inliner.document.settings.pep_file_url_template % pepnum)
     if fragment:
-        ref += "#" + fragment
+        ref += f"#{fragment}"
     roles.set_classes(options)
     return [nodes.reference(rawtext, title, refuri=ref, **options)], []
 
 
 def _rfc_reference_role(role, rawtext, text, lineno, inliner,
                         options={}, content=[]):
-    matched = EXPLICIT_TITLE_RE.match(text)
-    if matched:
+    if matched := EXPLICIT_TITLE_RE.match(text):
         title = utils.unescape(matched.group(1))
         target = utils.unescape(matched.group(2))
     else:
         target = utils.unescape(text)
-        title = "RFC " + utils.unescape(text)
+        title = f"RFC {utils.unescape(text)}"
     pep_str, _, fragment = target.partition("#")
     try:
         rfcnum = int(pep_str)
@@ -82,7 +80,7 @@ def _rfc_reference_role(role, rawtext, text, lineno, inliner,
         return [prb], [msg]
     ref = (inliner.document.settings.rfc_base_url + inliner.rfc_url % rfcnum)
     if fragment:
-        ref += "#" + fragment
+        ref += f"#{fragment}"
     roles.set_classes(options)
     return [nodes.reference(rawtext, title, refuri=ref, **options)], []
 
@@ -130,10 +128,14 @@ def parse_rst(full_path: Path) -> nodes.document:
 
 def pep_abstract(full_path: Path) -> str:
     """Return the first paragraph of the PEP abstract"""
-    for node in parse_rst(full_path).findall(nodes.section):
-        if node.next_node(nodes.title).astext() == "Abstract":
-            return node.next_node(nodes.paragraph).astext().strip().replace("\n", " ")
-    return ""
+    return next(
+        (
+            node.next_node(nodes.paragraph).astext().strip().replace("\n", " ")
+            for node in parse_rst(full_path).findall(nodes.section)
+            if node.next_node(nodes.title).astext() == "Abstract"
+        ),
+        "",
+    )
 
 
 def main():
