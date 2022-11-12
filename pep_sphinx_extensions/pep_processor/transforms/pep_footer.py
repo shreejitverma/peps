@@ -89,12 +89,15 @@ def _get_last_modified_timestamps():
     for change_set in change_sets:
         timestamp, files = change_set.split("\n", 1)
         for file in files.strip().split("\n"):
-            if file.startswith("pep-") and file[-3:] in {"txt", "rst"}:
-                if last_modified.get(file) == 0:
-                    try:
-                        last_modified[file] = float(timestamp)
-                    except ValueError:
-                        pass  # if float conversion fails
+            if (
+                file.startswith("pep-")
+                and file[-3:] in {"txt", "rst"}
+                and last_modified.get(file) == 0
+            ):
+                try:
+                    last_modified[file] = float(timestamp)
+                except ValueError:
+                    pass  # if float conversion fails
 
     return last_modified
 

@@ -31,7 +31,7 @@ class FileBuilder(StandaloneHTMLBuilder):
             title = ""
 
         # source filename
-        file_is_rst = Path(self.env.srcdir, docname + ".rst").exists()
+        file_is_rst = Path(self.env.srcdir, f"{docname}.rst").exists()
         source_name = f"{docname}.rst" if file_is_rst else f"{docname}.txt"
 
         # local table of contents

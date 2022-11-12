@@ -58,9 +58,9 @@ class NoneCoalesceIfBlockVisitor(ast.NodeVisitor):
 
         # Match `if a is None:` or `if a is not None:`, where `a` is a name.
         if isinstance(op, (ast.Is, ast.IsNot)) and \
-           isinstance(if_.test.left, ast.Name) and \
-           isinstance(if_.test.comparators[0], ast.NameConstant) and \
-           if_.test.comparators[0].value is None:
+               isinstance(if_.test.left, ast.Name) and \
+               isinstance(if_.test.comparators[0], ast.NameConstant) and \
+               if_.test.comparators[0].value is None:
 
             test_name = if_.test.left.id
         else:
@@ -81,27 +81,22 @@ class NoneCoalesceIfBlockVisitor(ast.NodeVisitor):
         none_stmt = none_block[0]
 
         # If there is no `a is not None` block, handle gracefully.
-        if len(value_block) == 1:
-            value_stmt = value_block[0]
-        else:
-            value_stmt = None
-
+        value_stmt = value_block[0] if len(value_block) == 1 else None
         # Assigning a value to `a` when it is `None`?
         if isinstance(none_stmt, ast.Assign) and \
-           len(none_stmt.targets) == 1:
+               len(none_stmt.targets) == 1:
 
             target = none_stmt.targets[0]
 
-            if isinstance(target, ast.Name):
-                if test_name == target.id:
-                    self.__callback(self.__file, if_.test.lineno,
-                                    target.lineno)
-                    return
+            if isinstance(target, ast.Name) and test_name == target.id:
+                self.__callback(self.__file, if_.test.lineno,
+                                target.lineno)
+                return
 
         # Assigning value of `a` to another identifier when a is not `None`?
         if isinstance(value_stmt, ast.Assign) and \
-             isinstance(value_stmt.value, ast.Name) and \
-             test_name == value_stmt.value.id:
+                 isinstance(value_stmt.value, ast.Name) and \
+                 test_name == value_stmt.value.id:
 
             end_line = max(value_stmt.lineno, none_stmt.lineno)
             self.__callback(self.__file, if_.test.lineno, end_line)
@@ -126,7 +121,7 @@ class NoneCoalesceOrVisitor(ast.NodeVisitor):
 
     def visit_BoolOp(self, bool_op):
         if not isinstance(bool_op.op, ast.Or) or \
-           not isinstance(bool_op.values[0], ast.Name):
+               not isinstance(bool_op.values[0], ast.Name):
             return
 
         defaults = ast.Call, ast.Dict, ast.List, ast.Num, ast.Set, ast.Str
@@ -157,9 +152,9 @@ class NoneCoalesceTernaryVisitor(ast.NodeVisitor):
 
             # Match `a is None` or `a is not None`, where `a` is a name.
             if isinstance(op, (ast.Is, ast.IsNot)) and \
-               isinstance(ifexp.test.left, ast.Name) and \
-               isinstance(ifexp.test.comparators[0], ast.NameConstant) and \
-               ifexp.test.comparators[0].value is None:
+                   isinstance(ifexp.test.left, ast.Name) and \
+                   isinstance(ifexp.test.comparators[0], ast.NameConstant) and \
+                   ifexp.test.comparators[0].value is None:
 
                 test_name = ifexp.test.left.id
             else:
@@ -197,7 +192,7 @@ class SafeNavAndVisitor(ast.NodeVisitor):
 
     def visit_BoolOp(self, bool_op):
         if not isinstance(bool_op.op, ast.And) or \
-           not isinstance(bool_op.values[0], ast.Name):
+               not isinstance(bool_op.values[0], ast.Name):
             return
 
         left_name = bool_op.values[0].id
@@ -243,9 +238,9 @@ class SafeNavIfBlockVisitor(ast.NodeVisitor):
 
         # Match `if a is None:` or `if a is not None:`, where `a` is a name.
         if isinstance(op, (ast.Is, ast.IsNot)) and \
-           isinstance(if_.test.left, ast.Name) and \
-           isinstance(if_.test.comparators[0], ast.NameConstant) and \
-           if_.test.comparators[0].value is None:
+               isinstance(if_.test.left, ast.Name) and \
+               isinstance(if_.test.comparators[0], ast.NameConstant) and \
+               if_.test.comparators[0].value is None:
 
             test_name = if_.test.left.id
         else:
@@ -260,11 +255,7 @@ class SafeNavIfBlockVisitor(ast.NodeVisitor):
             none_block = if_.orelse
             value_block = if_.body
 
-        if len(none_block) > 0:
-            none_lineno = none_block[0].lineno
-        else:
-            none_lineno = 0
-
+        none_lineno = none_block[0].lineno if len(none_block) > 0 else 0
         # If there is no `a is not None` block, then it's definitely not a
         # match.
         if len(value_block) == 1:
@@ -276,7 +267,7 @@ class SafeNavIfBlockVisitor(ast.NodeVisitor):
         # `a is not None` block. (But don't match bare `a` -- that's already
         # covered by the None coalesce visitors.)
         if isinstance(value_stmt, (ast.Assign, ast.Expr)) and \
-           not isinstance(value_stmt.value, ast.Name):
+               not isinstance(value_stmt.value, ast.Name):
             expr_name = get_name_from_node(value_stmt.value)
         else:
             return
@@ -308,9 +299,9 @@ class SafeNavTernaryVisitor(ast.NodeVisitor):
 
             # Match `a is None` or `a is not None`, where `a` is a name.
             if isinstance(op, (ast.Is, ast.IsNot)) and \
-               isinstance(ifexp.test.left, ast.Name) and \
-               isinstance(ifexp.test.comparators[0], ast.NameConstant) and \
-               ifexp.test.comparators[0].value is None:
+                   isinstance(ifexp.test.left, ast.Name) and \
+                   isinstance(ifexp.test.comparators[0], ast.NameConstant) and \
+                   ifexp.test.comparators[0].value is None:
 
                 test_name = ifexp.test.left.id
             else:
@@ -361,15 +352,8 @@ def get_name_from_node(node):
     '''
 
     while isinstance(node, (ast.Attribute, ast.Call, ast.Subscript)):
-        if isinstance(node, ast.Call):
-            node = node.func
-        else:
-            node = node.value
-
-    if isinstance(node, ast.Name):
-        return node.id
-    else:
-        return None
+        node = node.func if isinstance(node, ast.Call) else node.value
+    return node.id if isinstance(node, ast.Name) else None
 
 
 def log(text, file_, start_line, stop_line=None):
@@ -377,7 +361,7 @@ def log(text, file_, start_line, stop_line=None):
     Display a match, including file name, line number, and code excerpt.
     '''
 
-    print('{}: {}:{}'.format(text, file_, start_line))
+    print(f'{text}: {file_}:{start_line}')
 
     if stop_line is None:
         stop_line = start_line

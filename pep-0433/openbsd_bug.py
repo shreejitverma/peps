@@ -24,8 +24,7 @@ else:
 
 args = [sys.executable, '-c', code, str(fd)]
 if USE_FORK:
-    pid = os.fork()
-    if pid:
+    if pid := os.fork():
         os.waitpid(pid, 0)
         sys.exit(0)
 

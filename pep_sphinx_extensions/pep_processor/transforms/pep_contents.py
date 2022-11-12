@@ -45,8 +45,7 @@ class Contents(parts.Contents):
         self.backlinks = None
 
     def apply(self) -> None:
-        contents = self.build_contents(self.document[0][4:])  # skip PEP title, headers, <hr/>, and contents
-        if contents:
+        if contents := self.build_contents(self.document[0][4:]):
             self.startnode.replace_self(contents)
         else:
             # if no contents, remove the empty placeholder
@@ -73,6 +72,4 @@ class Contents(parts.Contents):
 
             item += self.build_contents(section)  # recurse to add sub-sections
             entries.append(item)
-        if entries:
-            return nodes.bullet_list('', *entries)
-        return []
+        return nodes.bullet_list('', *entries) if entries else []

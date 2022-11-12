@@ -15,16 +15,13 @@ def compute_resolution(func):
             t1 = func()
             t2 = func()
             dt = t2 - t1
-            if 0 < dt:
+            if dt > 0:
                 break
         else:
             dt = t2 - previous
             if dt <= 0.0:
                 continue
-        if resolution is not None:
-            resolution = min(resolution, dt)
-        else:
-            resolution = dt
+        resolution = min(resolution, dt) if resolution is not None else dt
         points += 1
         previous = func()
     return resolution
@@ -38,9 +35,9 @@ def format_duration(dt):
         return "%.0f ns" % (dt * 1e9)
 
 def test_clock(name, func):
-    print("%s:" % name)
+    print(f"{name}:")
     resolution = compute_resolution(func)
-    print("- resolution in Python: %s" % format_duration(resolution))
+    print(f"- resolution in Python: {format_duration(resolution)}")
 
 
 clocks = ['clock', 'perf_counter', 'process_time']
@@ -49,10 +46,10 @@ if hasattr(time, 'monotonic'):
 clocks.append('time')
 for name in clocks:
     func = getattr(time, name)
-    test_clock("%s()" % name, func)
+    test_clock(f"{name}()", func)
     info = time.get_clock_info(name)
-    print("- implementation: %s" % info.implementation)
-    print("- resolution: %s" % format_duration(info.resolution))
+    print(f"- implementation: {info.implementation}")
+    print(f"- resolution: {format_duration(info.resolution)}")
 
 clock_ids = [name for name in dir(time) if name.startswith("CLOCK_")]
 clock_ids.sort()

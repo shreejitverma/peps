@@ -26,7 +26,7 @@ def pep426_key(s):
     s = s.strip()
     m = PEP426_VERSION_RE.match(s)
     if not m:
-        raise ValueError('Not a valid version: %s' % s)
+        raise ValueError(f'Not a valid version: {s}')
     groups = m.groups()
     nums = tuple(int(v) for v in groups[0].split('.'))
     while len(nums) > 1 and nums[-1] == 0:
@@ -35,25 +35,11 @@ def pep426_key(s):
     pre = groups[3:5]
     post = groups[6:8]
     dev = groups[9:11]
-    if pre == (None, None):
-        pre = ()
-    else:
-        pre = pre[0], int(pre[1])
-    if post == (None, None):
-        post = ()
-    else:
-        post = post[0], int(post[1])
-    if dev == (None, None):
-        dev = ()
-    else:
-        dev = dev[0], int(dev[1])
+    pre = () if pre == (None, None) else (pre[0], int(pre[1]))
+    post = () if post == (None, None) else (post[0], int(post[1]))
+    dev = () if dev == (None, None) else (dev[0], int(dev[1]))
     if not pre:
-        # either before pre-release, or final release and after
-        if not post and dev:
-            # before pre-release
-            pre = ('a', -1) # to sort before a0
-        else:
-            pre = ('z',)    # to sort after all pre-releases
+        pre = ('a', -1) if not post and dev else ('z', )
     # now look at the state of post and dev.
     if not post:
         post = ('a',)
@@ -237,13 +223,13 @@ class Analysis:
             compatible_projects.add(pname)
 
     def print_report(self):
-        print("Analysing {}".format(self.title))
+        print(f"Analysing {self.title}")
         for category in self.categories:
             print(" ", category)
 
 
 def main(pepno = '426'):
-    print('Comparing PEP %s version sort to setuptools.' % pepno)
+    print(f'Comparing PEP {pepno} version sort to setuptools.')
 
     projects, public = get_projects(VERSION_CACHE)
     print()
@@ -258,11 +244,8 @@ def main(pepno = '426'):
     # e.g. "grep unequal pep426sort.log" for the PEP 426 sort differences
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == '386':
-        pepno = '386'
-    else:
-        pepno = '426'
-    logname = 'pep{}sort.log'.format(pepno)
+    pepno = '386' if len(sys.argv) > 1 and sys.argv[1] == '386' else '426'
+    logname = f'pep{pepno}sort.log'
     logging.basicConfig(level=logging.DEBUG, filename=logname,
                         filemode='w', format='%(message)s')
     logger.setLevel(logging.DEBUG)
